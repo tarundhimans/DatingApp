@@ -1,0 +1,236 @@
+﻿@model DatingApp.Models.Profile
+
+@{
+    ViewData["Title"] = "Create Profile";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Profile</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            border-radius: 20px;
+            padding: 10px 15px;
+        }
+
+        .btn-primary {
+            background-color: #25d366;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+        }
+
+            .btn-primary:hover {
+                background-color: #1ebd54;
+            }
+
+        .text-danger {
+            font-size: 0.9rem;
+        }
+
+        .modal-body .form-check {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Create Profile</h1>
+
+        <h4>Profile</h4>
+        <hr />
+
+        <form asp-action="Create" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div class="form-group">
+                <label asp-for="Bio" class="control-label"></label>
+                <input asp-for="Bio" class="form-control" required />
+                <span asp-validation-for="Bio" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Preferences" class="control-label"></label>
+                <input type="text" id="preferences-input" class="form-control" readonly placeholder="Select Preferences" />
+                <button type="button" class="btn btn-secondary mt-2" data-bs-toggle="modal" data-bs-target="#preferencesModal">Edit Preferences</button>
+                <input type="hidden" asp-for="Preferences" id="preferences-hidden" />
+                <span asp-validation-for="Preferences" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProfilePicture" class="control-label"></label>
+                <input type="file" asp-for="ProfilePicture" class="form-control" required />
+                <span asp-validation-for="ProfilePicture" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Day" class="control-label"></label>
+                <input asp-for="Day" class="form-control" min="1" max="31" />
+                <span asp-validation-for="Day" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Month" class="control-label"></label>
+                <input asp-for="Month" class="form-control" min="1" max="12" />
+                <span asp-validation-for="Month" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Year" class="control-label"></label>
+                <input asp-for="Year" class="form-control" min="1960" max="2008" />
+                <span asp-validation-for="Year" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Gender" class="control-label"></label>
+                <select asp-for="Gender" class="form-control">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+                <span asp-validation-for="Gender" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="InterestedIn" class="control-label"></label>
+                <select asp-for="InterestedIn" class="form-control">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+                <span asp-validation-for="InterestedIn" class="text-danger"></span>
+            </div>
+            <div class="form-group text-center">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+
+    <!-- Preferences Modal -->
+    <div class="modal fade" id="preferencesModal" tabindex="-1" aria-labelledby="preferencesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="preferencesModalLabel">Select Interests (Max 5)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- List of Interests -->
+                    @foreach (var interest in new[] {
+                    "90s Kid", "Harry Potter", "SoundCloud", "Spa Self Care", "Maggi", "Heavy Metal",
+                    "House Parties", "Gin Tonic", "Gymnastics", "Ludo", "Hockey", "Cafe Hopping",
+                    "Walking", "Hot Yoga", "Biryani", "Basketball", "Sneakers", "Meditation", "Sushi",
+                    "Spotify", "Slam Poetry", "Home Workout", "Theater", "Aquarium", "Instagram",
+                    "Hot Springs", "Running", "Travel", "Language Exchange", "Movies", "Guitarists",
+                    "Social Development", "Gym", "Social Media", "Hip Hop", "K-Pop", "Skateboarding",
+                    "Gospel", "Potterhead", "Trying New Things", "Photography", "Bollywood", "Bhangra",
+                    "Reading", "Singing", "Sports", "Poetry", "Stand Up Comedy", "Coffee", "Karaoke",
+                    "Fortnite", "Free Diving", "Self Development", "Mental Health Awareness", "Foodie Tour",
+                    "Voter Rights", "Jiu-Jitsu", "Climate Change", "Exhibition", "Walking My Dog",
+                    "LGBTQIA+ Rights", "Feminism", "VR Room", "Escape Cafe", "Shopping", "Brunch",
+                    "Investment", "Jetski", "Reggaeton", "Second-Hand Apparel", "Black Lives Matter",
+                    "Jogging", "Road Trips", "Vintage Fashion", "Voguing", "Couchsurfing", "Happy Hour",
+                    "Inclusivity", "Country Music", "Football", "Inline Skate", "Investing", "Tennis",
+                    "Ice Cream", "Ice Skating", "Human Rights", "West End Musicals", "Expositions",
+                    "Snowboarding", "Pig Roast", "Skiing", "Canoeing", "Dilatos", "Pentathlon", "Broadway",
+                    "PlayStation", "Five-a-Side Football", "Cheerleading", "Car Racing", "Choir", "Pole Dancing",
+                    "Pinterest", "Festivals", "Pub Quiz", "Catan", "Cosplay", "Motor Sports", "Coffee Stall",
+                    "Content Creation", "E-Sports", "Bicycle Racing", "Binge-Watching TV Shows", "Songwriter",
+                    "Bodycombat", "Tattoos", "Painting", "Bodyjam", "Paddle Boarding", "Padel", "Blackpink",
+                    "Surfing", "Bowling", "Grime", "90s Britpop", "Upcycling", "Equality", "Bodypump",
+                    "Beach Bars", "Bodystep", "Paragliding", "Astrology", "Motorcycles", "Equestrian",
+                    "Entrepreneurship", "Sake", "BTS", "Cooking", "Environmental Protection", "Fencing",
+                    "Soccer", "Saxophonist", "Sci-Fi", "Dancing", "Film Festival", "Freeletics", "Gardening",
+                    "Amateur Cook", "Exchange Program", "Sauna", "Art", "Politics", "Flamenco", "Museum",
+                    "Activism", "DAOs", "Real Estate", "Podcasts", "Disability Rights", "Rave", "Pimms",
+                    "Drive-Thru Cinema", "Rock Climbing", "BBQ", "Craft Beer", "Iced Tea", "Drummer",
+                    "Tea", "Board Games", "Roblox", "Pubs", "Rock", "Tango", "Drawing", "Trivia", "Pho",
+                    "Volunteering", "Environmentalism", "Rollerskating", "Wine", "Dungeons & Dragons",
+                    "Weightlifting", "Live Music", "Writing", "Xbox", "Vlogging", "Electronic Music", "Ramen",
+                    "World Peace", "Wrestling", "Literature", "Youth Empowerment", "Manga", "Pride",
+                    "Marathon", "Makeup", "YouTube", "Martial Arts", "Marvel", "Luge", "Ice Hockey",
+                    "Taekwondo", "Trampoline", "Water Polo", "Rhythmic Gymnastics", "Vegan Cooking",
+                    "Rowing", "Vermut", "Korean Food", "Sports Shooting", "Twitter", "Squash", "Volleyball",
+                    "Walking Tour", "Vinyasa", "Virtual Reality", "League of Legends", "Karate", "Lacrosse",
+                    "NFTs", "Bar Hopping", "Nintendo", "Baseball", "Parties", "Ballet", "Band", "Online Games",
+                    "Battle Ground", "Beach Tennis", "Nightlife", "Online Shopping", "Sailing", "Bassist",
+                    "Online Broker", "Military", "Memes", "Among Us", "Motorbike Racing", "Muay Thai",
+                    "Motorcycling", "Metaverse", "Mindfulness", "Acapella", "Musical Instrument", "Art Galleries",
+                    "Musical Writing", "Baking", "Camping", "Blogging", "Collecting", "Cars", "Startups",
+                    "Boba Tea", "High School Sports", "Badminton", "Active Lifestyle", "Fashion", "Anime",
+                    "NBA", "MLB", "Funk Music", "Diving", "Caipirinha", "Flag Football", "Handball",
+                    "Artistic Swimming", "Athletics", "Indoor Activities", "Softball", "Beach Volleyball",
+                    "Tempeh", "DIY", "Town Festivities"
+                    })
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="@interest" id="interest-@interest.Replace(" ", "-")">
+                            <label class="form-check-label" for="interest-@interest.Replace(" ", "-")">
+                                @interest
+                            </label>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="save-preferences">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.5.1.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.19.2/jquery.validate.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/mvc/5.2.7/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            let selectedCount = 0;
+
+            $('#preferencesModal input[type="checkbox"]').on('change', function () {
+                if ($(this).is(':checked')) {
+                    selectedCount++;
+                } else {
+                    selectedCount--;
+                }
+
+                if (selectedCount > 5) {
+                    alert("You can only select up to 5 interests.");
+                    $(this).prop('checked', false);
+                    selectedCount = 5;
+                }
+            });
+
+            $('#save-preferences').on('click', function () {
+                const selectedPreferences = [];
+                $('#preferencesModal .form-check-input:checked').each(function () {
+                    selectedPreferences.push($(this).val());
+                });
+                $('#preferences-hidden').val(selectedPreferences.join(','));
+                $('#preferences-input').val(selectedPreferences.join(', '));
+                $('#preferencesModal').modal('hide');
+
+                setTimeout(function () {
+                    $('.modal-backdrop').remove();
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -3,28 +3,48 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - DatingApp</title>
+    <title>@ViewData["Title"] - DatingApplication</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/DatingApp.styles.css" asp-append-version="true" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Include Bootstrap CSS and JS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="~/DatingApplication.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+    @RenderSection("Styles", required: false)
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">DatingApp</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">DatingApplication</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                        @if (User.IsInRole(SD.Role_User))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Profiles" asp-action="Index">Profile</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" href="/Notification/Index">
+                                    Notifications <span id="notificationCount" class="badge bg-danger">0</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Chat" asp-action="Index">Chat</a>
+                            </li>
+
+                        }
+
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>
@@ -39,12 +59,114 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2024 - DatingApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2024 - DatingApplication - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.3/signalr.min.js"></script>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.3.1.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate.unobtrusive/3.2.11/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function fetchNotifications() {
+                $.ajax({
+                    url: '@Url.Action("GetNotifications", "Notification")',
+                    method: 'GET',
+                    success: function (result) {
+                        var notificationsList = $('#notificationsList');
+                        notificationsList.empty();
+
+                        if (result.notifications.length > 0) {
+                            result.notifications.forEach(function (notification) {
+                                notificationsList.append('<li class="dropdown-item">' + notification.message + '</li>');
+                            });
+                            $('#notificationCount').text(result.notifications.length).removeClass('d-none');
+                        } else {
+                            notificationsList.append('<li class="dropdown-item">No new notifications</li>');
+                            $('#notificationCount').addClass('d-none');
+                        }
+                    },
+                    error: function (err) {
+                        console.error('Error fetching notifications:', err);
+                    }
+                });
+            }
+
+            // Fetch notifications on page load
+            fetchNotifications();
+
+            // Set up SignalR connection
+            var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+            connection.on("ReceiveNotification", function (message) {
+                fetchNotifications();
+            });
+
+            connection.start().catch(function (err) {
+                return console.error(err.toString());
+            });
+
+            // Fetch notifications periodically
+            setInterval(fetchNotifications, 2000); // Every 60 seconds
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("notificationsList").addEventListener("click", function (event) {
+                var target = event.target;
+
+                if (target.classList.contains("dropdown-item")) {
+                    var notificationId = target.getAttribute("data-id");
+
+                    if (notificationId) {
+                        // Mark notification as read
+                        fetch(`/Notification/MarkAsRead/${notificationId}`, {
+                            method: 'POST'
+                        }).then(function () {
+                            // Redirect to notification details page
+                            window.location.href = `/Notification/Details/${notificationId}`;
+                        });
+                    } else {
+                        console.error("Notification ID is null");
+                    }
+                }
+            });
+
+            // Update notifications from the server
+            function loadNotifications() {
+                fetch('/Notification/GetNotifications')
+                    .then(response => response.json())
+                    .then(data => {
+                        var notificationsList = document.getElementById("notificationsList");
+                        var notificationCountElement = document.getElementById("notificationCount");
+
+                        notificationsList.innerHTML = ''; // Clear existing items
+                        if (data.notifications.length > 0) {
+                            data.notifications.forEach(notification => {
+                                var li = document.createElement("li");
+                                li.classList.add("dropdown-item");
+                                li.setAttribute("data-id", notification.id);
+                                li.textContent = notification.message;
+                                notificationsList.appendChild(li);
+                            });
+                            notificationCountElement.textContent = data.notifications.length;
+                            notificationCountElement.classList.remove("d-none");
+                        } else {
+                            notificationsList.innerHTML = '<li class="dropdown-item">No new notifications</li>';
+                            notificationCountElement.classList.add("d-none");
+                        }
+                    });
+            }
+
+            // Load notifications on page load
+            loadNotifications();
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

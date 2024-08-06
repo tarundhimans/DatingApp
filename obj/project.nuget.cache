@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "kTnObhK4oIM=",
+  "dgSpecHash": "RqTsbgGclVo=",
   "success": true,
-  "projectFilePath": "C:\\Users\\QSITA025\\source\\repos\\DatingApp\\DatingApp.csproj",
+  "projectFilePath": "C:\\Projects\\DatingApp\\DatingApp.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\QSITA025\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\QSITA025\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",

@@ -8684,11 +8684,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\QSITA025\\source\\repos\\DatingApp\\DatingApp.csproj",
+      "projectUniqueName": "C:\\Projects\\DatingApp\\DatingApp.csproj",
       "projectName": "DatingApp",
-      "projectPath": "C:\\Users\\QSITA025\\source\\repos\\DatingApp\\DatingApp.csproj",
+      "projectPath": "C:\\Projects\\DatingApp\\DatingApp.csproj",
       "packagesPath": "C:\\Users\\QSITA025\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\QSITA025\\source\\repos\\DatingApp\\obj\\",
+      "outputPath": "C:\\Projects\\DatingApp\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

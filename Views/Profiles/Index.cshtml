@@ -1,0 +1,127 @@
+﻿@model DatingApp.Models.Profile
+
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .profile-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .card-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
+
+        .card-details {
+            width: 100%;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .card-details p {
+            font-size: 1rem;
+            color: #555;
+            margin: 5px 0;
+        }
+
+        .card-actions {
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            background-color: #25d366;
+            border: none;
+        }
+
+            .btn-primary:hover {
+                background-color: #1ebe57;
+            }
+    </style>
+</head>
+<body>
+    <div class="container profile-container">
+        <div class="profile-card">
+            @if (Model.ProfilePicture != null && Model.ProfilePicture.Length > 0)
+            {
+                <img src="@($"data:image/jpeg;base64,{Convert.ToBase64String(Model.ProfilePicture)}")" class="card-img" alt="Profile Picture">
+            }
+            else
+            {
+                <img src="~/images/default-profile.png" class="card-img" alt="Default Profile Picture">
+            }
+            <div class="card-details">
+                <h5 class="card-title">@Model.User.Name</h5>
+                <p><strong>Email:</strong> @Model.User.Email</p>
+                <p><strong>Bio:</strong> @Model.Bio</p>
+                <p><strong>Preferences:</strong> @Model.Preferences</p>
+                <p><strong>Birthday:</strong> @($"{Model.Day}/{Model.Month}/{Model.Year}")</p>
+                <p><strong>Gender:</strong> @Model.Gender</p>
+                <p><strong>Interested In:</strong> @Model.InterestedIn</p>
+            </div>
+            <div class="card-actions">
+                <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-primary">Edit</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cards = document.querySelectorAll('.swipe-card');
+
+            cards.forEach(card => {
+                let posX = 0;
+                let posY = 0;
+
+                card.addEventListener('touchstart', (e) => {
+                    posX = e.touches[0].clientX;
+                    posY = e.touches[0].clientY;
+                });
+
+                card.addEventListener('touchmove', (e) => {
+                    const deltaX = e.touches[0].clientX - posX;
+                    const deltaY = e.touches[0].clientY - posY;
+
+                    card.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                });
+
+                card.addEventListener('touchend', (e) => {
+                    card.style.transform = 'translate(0, 0)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
