@@ -1,8 +1,276 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<DatingApp.Models.Profile>
+
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+<div class="container mt-4">
+    <h1 class="text-center">All Profiles</h1>
+
+
+    <form id="filter-form" method="get" action="/Home/SearchProfiles" class="mb-4">
+        <div class="row align-items-end">
+
+            <div class="col-md-3 mb-3">
+                <input type="text" id="search-input" name="query" class="form-control" placeholder="Search by name or bio..." />
+            </div>
+            <div class="col-md-3 mb-3">
+                <select id="preferences-filter" name="preferences" class="form-control" multiple="multiple">
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <select id="age-range-filter" name="ageRange" class="form-control">
+                    <option value="">Select Age Range</option>
+                    <option value="18-25">18-25</option>
+                    <option value="26-35">26-35</option>
+                    <option value="36-45">36-45</option>
+                    <option value="46-60">46-60</option>
+                    <option value="60+">60+</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3 d-flex align-items-end gap-2">
+                <button type="submit" id="search-button" class="btn btn-primary">Filter</button>
+                <button type="button" id="clear-button" class="btn btn-secondary">Clear</button>
+            </div>
+        </div>
+    </form>
+
+    <div id="profiles-container" class="swipe-container position-relative d-flex justify-content-center align-items-center">
+        <button class="swipe-arrow left-arrow">&#8592;</button>
+        @foreach (var profile in Model)
+        {
+            <div class="swipe-card">
+
+                @if (profile.ProfilePicture != null && profile.ProfilePicture.Length > 0)
+                {
+                    <img src="@($"data:image/jpeg;base64,{Convert.ToBase64String(profile.ProfilePicture)}")" class="card-img" alt="Profile Picture">
+                }
+                else
+                {
+                    <img src="~/images/default-profile.png" class="card-img" alt="Default Profile Picture">
+                }
+                <div class="card-details">
+                    <h5 class="card-title">@profile.User.Name</h5>
+                    <p class="card-email"><strong>Email:</strong> @profile.User.Email</p>
+                    <p class="card-bio"><strong>Bio:</strong> @profile.Bio</p>
+                    <p><strong>Preferences:</strong> @profile.Preferences</p>
+                    <p><strong>Birthday:</strong> @($"{profile.Day}/{profile.Month}/{profile.Year}")</p>
+                    <p><strong>Gender:</strong> @profile.Gender</p>
+                    <p><strong>Interested In:</strong> @profile.InterestedIn</p>
+                </div>
+                <div class="card-actions">
+                    <button class="btn btn-like" data-user-id="@profile.UserId"><i class="fas fa-thumbs-up"></i> Like</button>
+                    <button class="btn btn-dislike" data-user-id="@profile.UserId"><i class="fas fa-thumbs-down"></i> Dislike</button>
+                </div>
+            </div>
+
+        }
+        <button class="swipe-arrow right-arrow">&#8594;</button>
+    </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+    <script src="~/js/chat.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cards = document.querySelectorAll('.swipe-card');
+            const leftArrow = document.querySelector('.left-arrow');
+            const rightArrow = document.querySelector('.right-arrow');
+            const searchButton = document.getElementById('search-button');
+            const clearButton = document.getElementById('clear-button');
+            let currentIndex = 0;
+
+            $('#preferences-filter').select2({
+                placeholder: 'Select Preferences',
+                data: @Html.Raw(Json.Serialize(ViewBag.Preferences))
+                            });
+
+            function updateCardVisibility() {
+                cards.forEach((card, index) => {
+                    card.style.display = index === currentIndex ? 'block' : 'none';
+                });
+            }
+
+            function swipeCard(deltaX) {
+                const card = cards[currentIndex];
+                card.style.transition = 'transform 0.5s ease';
+                card.style.transform = `translate(${deltaX > 0 ? card.offsetWidth : -card.offsetWidth}px, 0)`;
+                setTimeout(() => {
+                    currentIndex = (currentIndex + (deltaX > 0 ? 1 : -1) + cards.length) % cards.length;
+                    updateCardVisibility();
+                    card.style.transition = 'none';
+                    card.style.transform = 'translate(0, 0)';
+                }, 500);
+            }
+
+            updateCardVisibility();
+
+            leftArrow.addEventListener('click', () => {
+                swipeCard(-1);
+            });
+
+            rightArrow.addEventListener('click', () => {
+                swipeCard(1);
+            });
+
+            cards.forEach(card => {
+                let posX = 0;
+                let posY = 0;
+                let isDragging = false;
+
+                card.addEventListener('touchstart', (e) => {
+                    posX = e.touches[0].clientX;
+                    posY = e.touches[0].clientY;
+                    isDragging = true;
+                    card.style.transition = 'transform 0s';
+                });
+
+                card.addEventListener('touchmove', (e) => {
+                    if (isDragging) {
+                        const deltaX = e.touches[0].clientX - posX;
+                        const deltaY = e.touches[0].clientY - posY;
+                        card.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                    }
+                });
+
+                card.addEventListener('touchend', (e) => {
+                    isDragging = false;
+                    const deltaX = e.changedTouches[0].clientX - posX;
+                    if (Math.abs(deltaX) > card.offsetWidth / 3) {
+                        swipeCard(deltaX);
+                    } else {
+                        card.style.transition = 'transform 0.5s ease';
+                        card.style.transform = 'translate(0, 0)';
+                    }
+                });
+            });
+
+            searchButton.addEventListener('click', function (e) {
+                e.preventDefault();
+                const query = document.getElementById('search-input').value;
+                const preferences = $('#preferences-filter').val().join(',');
+                const ageRange = document.getElementById('age-range-filter').value;
+
+                const url = `/Home/SearchProfiles?query=${query}&preferences=${preferences}&ageRange=${ageRange}`;
+                fetch(url)
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById('profiles-container').innerHTML = data;
+                        updateCardVisibility();
+                    });
+            });
+
+            clearButton.addEventListener('click', function () {
+                document.getElementById('search-input').value = '';
+                $('#preferences-filter').val(null).trigger('change');
+                document.getElementById('age-range-filter').value = '';
+                fetch('/Home/SearchProfiles')
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById('profiles-container').innerHTML = data;
+                        updateCardVisibility();
+                        location.reload();
+                    });
+            });
+        });
+    </script>
+}
+
+<style>
+    .search-container {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .swipe-container {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 400px;
+        transform: translateY(-20px);
+    }
+
+    .swipe-card {
+        display: none;
+        position: absolute;
+        top: 30px;
+    }
+
+        .swipe-card:first-child {
+            display: block;
+        }
+
+    .swipe-arrow {
+        position: absolute;
+        top: 30%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.8);
+        border: none;
+        font-size: 2rem;
+        cursor: pointer;
+        z-index: 10;
+        padding: 0.5rem 1rem;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .left-arrow {
+        left: 20px;
+    }
+
+    .right-arrow {
+        right: 20px;
+    }
+
+    .card-content {
+        position: relative;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        width: 300px;
+        max-width: 90%;
+    }
+
+    .card-img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .card-details {
+        padding: 15px;
+    }
+
+    .card-title {
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .card-email, .card-bio {
+        margin: 5px 0;
+    }
+
+    .card-actions {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px;
+    }
+
+    .btn-like, .btn-dislike {
+        border: none;
+        background: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #28a745;
+    }
+
+    .btn-dislike {
+        color: #dc3545;
+    }
+</style>

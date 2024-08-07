@@ -12,5 +12,7 @@ namespace DatingApp.Data
         }
         public DbSet<ApplicationUser>ApplicationUsers { get; set; }
         public DbSet<Profile>Profiles { get; set; }
+        public DbSet<Match>Matches { get; set; }
+        public DbSet<Notification>Notifications { get; set; }
     }
 }
